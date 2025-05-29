@@ -1,6 +1,13 @@
 // app/routes/__root.tsx
 import type { ReactNode } from 'react';
-import { Outlet, createRootRoute, HeadContent, Scripts, Link } from '@tanstack/react-router';
+import {
+	Outlet,
+	createRootRoute,
+	HeadContent,
+	Scripts,
+	Link,
+	useNavigate,
+} from '@tanstack/react-router';
 
 import {
 	ClerkProvider,
@@ -26,13 +33,15 @@ import { Button } from '../../components/ui/button';
 import { getSignedInUserId } from '../../data/getSignedInUserId';
 
 export const Route = createRootRoute({
-  notFoundComponent: () => <div className='text-3xl text-center py-10 text-muted-foreground'>Oops! Page not found</div>,
-  beforeLoad: async () => {
-    const userId = await getSignedInUserId();
-    return {
-      userId,
-    }
-  },
+	notFoundComponent: () => (
+		<div className='text-3xl text-center py-10 text-muted-foreground'>Oops! Page not found</div>
+	),
+	beforeLoad: async () => {
+		const userId = await getSignedInUserId();
+		return {
+			userId,
+		};
+	},
 	head: () => ({
 		meta: [
 			{
@@ -101,6 +110,7 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+	const navigate = useNavigate();
 	return (
 		<ClerkProvider>
 			<html>
@@ -137,7 +147,19 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 											},
 										},
 									}}
-								/>
+								>
+									<UserButton.MenuItems>
+										<UserButton.Action
+											label='Dashboard'
+											labelIcon={<ChartColumnBigIcon size="16" />}
+											onClick={() =>
+												navigate({
+													to: '/dashboard',
+												})
+											}
+										/>
+									</UserButton.MenuItems>
+								</UserButton>
 							</SignedIn>
 						</div>
 					</nav>
