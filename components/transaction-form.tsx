@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -25,11 +26,10 @@ export const transactionFormSchema = z.object({
 
 export function TransactionForm({
 	categories,
-	onSubmit,
 	defaultValues,
 }: {
 	categories: (typeof categoriesTable.$inferSelect)[];
-	onSubmit: (data: z.infer<typeof transactionFormSchema>) => Promise<void>;
+	// onSubmit: (data: z.infer<typeof transactionFormSchema>) => Promise<void>;
 	defaultValues?: {
 		transactionType: 'income' | 'expense';
 		amount: number;
@@ -50,13 +50,18 @@ export function TransactionForm({
 		},
 	});
 
-	const filteredCategories = categories.filter(
-		(cat) => cat.type === form.getValues('transactionType'),
-	);
+	// Watch the transaction type to filter categories dynamically
+	const transactionType = form.watch('transactionType');
+	const filteredCategories = categories.filter((cat) => cat.type === transactionType);
+
+	// Reset category selection when transaction type changes
+	useEffect(() => {
+		form.setValue('categoryId', 0);
+	}, [transactionType, form]);
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)}>
+			<form>
 				<fieldset
 					disabled={form.formState.isSubmitting}
 					className='grid grid-cols-2 gap-y-5 gap-x-2'
@@ -92,7 +97,10 @@ export function TransactionForm({
 								<FormItem>
 									<FormLabel>Category</FormLabel>
 									<FormControl>
-										<Select value={field.value.toString()} onValueChange={field.onChange}>
+										<Select 
+											value={field.value === 0 ? '' : field.value.toString()} 
+											onValueChange={(value) => field.onChange(parseInt(value, 10))}
+										>
 											<SelectTrigger>
 												<SelectValue placeholder='Category' />
 											</SelectTrigger>
