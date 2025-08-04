@@ -26,10 +26,11 @@ export const transactionFormSchema = z.object({
 
 export function TransactionForm({
 	categories,
+	onSubmit,
 	defaultValues,
 }: {
 	categories: (typeof categoriesTable.$inferSelect)[];
-	// onSubmit: (data: z.infer<typeof transactionFormSchema>) => Promise<void>;
+	onSubmit: (data: z.infer<typeof transactionFormSchema>) => Promise<void>;
 	defaultValues?: {
 		transactionType: 'income' | 'expense';
 		amount: number;
@@ -61,7 +62,7 @@ export function TransactionForm({
 
 	return (
 		<Form {...form}>
-			<form>
+			<form onSubmit={form.handleSubmit(onSubmit)}>
 				<fieldset
 					disabled={form.formState.isSubmitting}
 					className='grid grid-cols-2 gap-y-5 gap-x-2'
